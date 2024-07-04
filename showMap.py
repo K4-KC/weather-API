@@ -59,7 +59,9 @@ def get_temp(start_time, no, _lat_, _lon_, res, api_key):
                 print(now.strftime("%d%m%Y-%H%M%S-%f"), api_key, loadingBar((i*res[1]+(j+1))/size), 
                       '% 9.2f  %2d %3d:%-3d  % 6.2f:%- 7.2f%23s%2d'%(time.time()-start_time, no, i, j, lat, lon, 'connection timed out ', no))
                 continue
-
+    
+    print(now.strftime("%d%m%Y-%H%M%S-%f"), api_key, loadingBar(1), 
+                                '% 9.2f  Thread %2d done'%(time.time()-start_time, no))
     return temp_array.tolist()
 
 def mergeColors(color1, color2, ratio):
@@ -141,74 +143,73 @@ API_KEY = ["77870069d2447b79ae6c8f9cc771849b",
 
 file_path = "C:/Users/kanva/Desktop/rave unde/temp_list_southamerica_420x316_-55-14_-85--33.txt"
 
-start_lat, end_lat = -55, 14
-start_lon, end_lon = -85, -33
-# res = (120, int((start_lon-end_lon)/(start_lat-end_lat)*120))
-res = (420, 316)
-print(res)
+# start_lat, end_lat = -55, 14
+# start_lon, end_lon = -85, -33
+# # res = (120, int((start_lon-end_lon)/(start_lat-end_lat)*120))
+# res = (420, 316)
+# print(res)
 
-threadNo = 70
-threads = [None]*threadNo
-for i in range(threadNo):
-    threads[i] = CreateThread(target=get_temp, args=(time.time(), i, 
-        (end_lat-(i+1)*(end_lat-start_lat)/threadNo, end_lat-i*(end_lat-start_lat)/threadNo), 
-            (start_lon, end_lon), (res[0]//threadNo, res[1]), API_KEY[i]))
-    threads[i].start()
+# threadNo = 70
+# threads = [None]*threadNo
+# for i in range(threadNo):
+#     threads[i] = CreateThread(target=get_temp, args=(time.time(), i, 
+#         (end_lat-(i+1)*(end_lat-start_lat)/threadNo, end_lat-i*(end_lat-start_lat)/threadNo), 
+#             (start_lon, end_lon), (res[0]//threadNo, res[1]), API_KEY[i]))
+#     threads[i].start()
 
-temp_list = []
-for i in range(threadNo):
-    for join in threads[i].join():
-        temp_list.append(join)
-    print("Thread", i, "done")
-write_list(file_path, temp_list)
-print("List written in ", file_path)
-
+# temp_list = []
+# for i in range(threadNo):
+#     for join in threads[i].join():
+#         temp_list.append(join)
+# write_list(file_path, temp_list)
+# print("List written in ", file_path)
 
 
-# temp_data = Path(file_path)
 
-# with temp_data.open('rb') as f:
-#     temp_data = pickle.load(f)
+temp_data = Path(file_path)
 
-# # temp_temp = []
-# # for j in range(20):
-# #     for i in range(7):
-# #         temp_temp.append(temp_data[(j+1)*7-i-1])
+with temp_data.open('rb') as f:
+    temp_data = pickle.load(f)
 
-# temp_array = np.array(temp_data)
-# print(temp_array.shape)
+# temp_temp = []
+# for j in range(20):
+#     for i in range(7):
+#         temp_temp.append(temp_data[(j+1)*7-i-1])
 
-# pygame.init()
+temp_array = np.array(temp_data)
+print(temp_array.shape)
 
-# res = temp_array.shape
-# window_res = (300, 300)
-# screen = pygame.display.set_mode(window_res)
-# temp_surface = pygame.Surface((res[1], res[0]), pygame.SRCALPHA)
+pygame.init()
 
-# # short_temp_array = np.array(temp_array[:10, :10])
-# # MAX_TEMP = np.max(short_temp_array)
-# # MIN_TEMP = np.min(short_temp_array)
+res = temp_array.shape
+window_res = (400, 450)
+screen = pygame.display.set_mode(window_res)
+temp_surface = pygame.Surface((res[1], res[0]), pygame.SRCALPHA)
 
-# colors = ((255, 197, 20), (0, 17, 232))
+# short_temp_array = np.array(temp_array[:10, :10])
+# MAX_TEMP = np.max(short_temp_array)
+# MIN_TEMP = np.min(short_temp_array)
 
-# MAX_TEMP = np.max(temp_array)
-# MIN_TEMP = np.min(temp_array)
-# division = (MAX_TEMP - MIN_TEMP)
-# print(MAX_TEMP, MIN_TEMP, division)
+colors = ((255, 197, 20), (0, 1, 212))
 
-# running = True
-# while(running):
+MAX_TEMP = np.max(temp_array)
+MIN_TEMP = np.min(temp_array)
+division = (MAX_TEMP - MIN_TEMP)
+print(MAX_TEMP, MIN_TEMP, division)
+
+running = True
+while(running):
     
-#     for event in pygame.event.get():
-#         if event.type == pygame.QUIT:
-#             running = False
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
         
-#     for i in range(res[1]):
-#         for j in range(res[0]):
-#             temp = temp_array[j][i]
-#             temp = (temp - MIN_TEMP)/division
-#             temp_surface.set_at((i, j), mergeColors(colors[0], colors[1], temp))
+    for i in range(res[1]):
+        for j in range(res[0]):
+            temp = temp_array[j][i]
+            temp = (temp - MIN_TEMP)/division
+            temp_surface.set_at((i, j), mergeColors(colors[0], colors[1], temp))
 
-#     screen.blit(temp_surface, ((window_res[0]-res[1])//2, (window_res[1]-res[0])//2))
+    screen.blit(temp_surface, ((window_res[0]-res[1])//2, (window_res[1]-res[0])//2))
 
-#     pygame.display.flip()
+    pygame.display.flip()
